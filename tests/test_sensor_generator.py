@@ -1,5 +1,5 @@
 """
-Unit tests for the phosphobot_construct.sensor_generator module.
+Unit tests for the phosphobot_construct.sensor_generation module.
 """
 
 import unittest
@@ -21,7 +21,7 @@ sys.modules['pytorch3d.structures'] = MagicMock()
 sys.modules['pytorch3d.io'] = MagicMock()
 
 # Import the module under test with mocked dependencies
-from src.phosphobot_construct.sensor_generator import SensorGenerator, generate_training_data
+from src.phosphobot_construct.sensor_generation import SensorGenerator, generate_training_data
 
 
 class TestSensorGenerator(unittest.TestCase):
@@ -30,11 +30,11 @@ class TestSensorGenerator(unittest.TestCase):
     def setUp(self):
         """Setup for tests."""
         # Create patchers
-        self.patch_has_pytorch3d = patch('src.phosphobot_construct.sensor_generator.HAS_PYTORCH3D', True)
+        self.patch_has_pytorch3d = patch('src.phosphobot_construct.sensor_generation.HAS_PYTORCH3D', True)
         self.patch_torch_device = patch('torch.device')
         self.patch_os_path_exists = patch('os.path.exists')
-        self.patch_load_obj = patch('src.phosphobot_construct.sensor_generator.load_obj')
-        self.patch_meshes = patch('src.phosphobot_construct.sensor_generator.Meshes')
+        self.patch_load_obj = patch('src.phosphobot_construct.sensor_generation.load_obj')
+        self.patch_meshes = patch('src.phosphobot_construct.sensor_generation.Meshes')
         self.patch_cv2_resize = patch('cv2.resize')
         self.patch_cv2_imwrite = patch('cv2.imwrite')
         self.patch_np_save = patch('np.save')
@@ -109,7 +109,7 @@ class TestSensorGenerator(unittest.TestCase):
     def test_init_without_pytorch3d(self):
         """Test initialization without PyTorch3D available."""
         # Patch to simulate PyTorch3D not available
-        with patch('src.phosphobot_construct.sensor_generator.HAS_PYTORCH3D', False):
+        with patch('src.phosphobot_construct.sensor_generation.HAS_PYTORCH3D', False):
             # Create sensor generator
             generator = SensorGenerator(device="cuda")
             
@@ -117,8 +117,8 @@ class TestSensorGenerator(unittest.TestCase):
             self.assertEqual(generator.device, "mock_device")
             self.assertFalse(generator.initialized)
     
-    @patch('src.phosphobot_construct.sensor_generator.RasterizationSettings')
-    @patch('src.phosphobot_construct.sensor_generator.PointLights')
+    @patch('src.phosphobot_construct.sensor_generation.RasterizationSettings')
+    @patch('src.phosphobot_construct.sensor_generation.PointLights')
     def test_setup_renderer(self, mock_lights, mock_raster_settings):
         """Test renderer setup."""
         # Configure mocks
@@ -222,7 +222,7 @@ class TestSensorGenerator(unittest.TestCase):
     def test_load_mesh_pytorch3d_not_available(self):
         """Test mesh loading when PyTorch3D is not available."""
         # Patch to simulate PyTorch3D not available
-        with patch('src.phosphobot_construct.sensor_generator.HAS_PYTORCH3D', False):
+        with patch('src.phosphobot_construct.sensor_generation.HAS_PYTORCH3D', False):
             # Create sensor generator
             generator = SensorGenerator()
             
@@ -249,11 +249,11 @@ class TestSensorGenerator(unittest.TestCase):
         # Check that None was returned
         self.assertIsNone(mesh_data)
     
-    @patch('src.phosphobot_construct.sensor_generator.MeshRenderer')
-    @patch('src.phosphobot_construct.sensor_generator.MeshRasterizer')
-    @patch('src.phosphobot_construct.sensor_generator.SoftPhongShader')
-    @patch('src.phosphobot_construct.sensor_generator.FoVPerspectiveCameras')
-    @patch('src.phosphobot_construct.sensor_generator.look_at_view_transform')
+    @patch('src.phosphobot_construct.sensor_generation.MeshRenderer')
+    @patch('src.phosphobot_construct.sensor_generation.MeshRasterizer')
+    @patch('src.phosphobot_construct.sensor_generation.SoftPhongShader')
+    @patch('src.phosphobot_construct.sensor_generation.FoVPerspectiveCameras')
+    @patch('src.phosphobot_construct.sensor_generation.look_at_view_transform')
     def test_render_rgb_depth_success(
         self, mock_look_at, mock_cameras, mock_shader, mock_rasterizer, mock_renderer
     ):
@@ -314,7 +314,7 @@ class TestSensorGenerator(unittest.TestCase):
     def test_render_rgb_depth_no_pytorch3d(self):
         """Test RGB and depth rendering without PyTorch3D."""
         # Patch to simulate PyTorch3D not available
-        with patch('src.phosphobot_construct.sensor_generator.HAS_PYTORCH3D', False):
+        with patch('src.phosphobot_construct.sensor_generation.HAS_PYTORCH3D', False):
             # Create sensor generator
             generator = SensorGenerator(image_size=(320, 240))
             
@@ -510,7 +510,7 @@ class TestSensorGenerator(unittest.TestCase):
         self.assertEqual(len(file_paths["depth_paths"]), 2)
 
 
-@patch('src.phosphobot_construct.sensor_generator.SensorGenerator')
+@patch('src.phosphobot_construct.sensor_generation.SensorGenerator')
 def test_generate_training_data(mock_generator_class):
     """Test the generate_training_data function."""
     # Configure mocks
