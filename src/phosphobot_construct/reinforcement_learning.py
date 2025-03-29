@@ -11,7 +11,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 from typing import Dict, List, Optional, Union, Any, Tuple
-import cv2, logging
+
+logger = logging.getLogger(__name__)
 
 # Import conditional to make the module work even without dependencies
 try:
@@ -24,9 +25,7 @@ except ImportError:
     logger.warning("Reinforcement learning dependencies not installed.")
     logger.warning("Install with: pip install gymnasium stable-baselines3")
     HAS_RL_DEPS = False
-
-logger = logging.getLogger(__name__)
-
+    exit()
 
 class RobotTransformerPolicy(nn.Module):
     """
