@@ -1,5 +1,7 @@
 # Phosphobot Construct: Robot Training w/GenAI for Superhuman Skills
 
+*"If you can imagine it, you can achieve it. If you can dream it, you can become it."* - William Arthur Ward Quote
+
 ![image](https://github.com/user-attachments/assets/89185655-a23c-4dc6-9215-94f7d49514d3)
 
 ## Concept
