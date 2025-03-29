@@ -11,10 +11,10 @@ import numpy as np
 from unittest.mock import patch, MagicMock, PropertyMock
 
 # Mock torch and diffusers since they're optional dependencies
-sys.modules['torch'] = MagicMock()
-sys.modules['diffusers'] = MagicMock()
-sys.modules['diffusers.ShapEPipeline'] = MagicMock()
-sys.modules['trimesh'] = MagicMock()
+# sys.modules['torch'] = MagicMock()
+# sys.modules['diffusers'] = MagicMock()
+# sys.modules['diffusers.ShapEPipeline'] = MagicMock()
+# sys.modules['trimesh'] = MagicMock()
 
 from src.phosphobot_construct.text_to_3d import TextTo3DConverter, convert_scenarios_to_3d
 

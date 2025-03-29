@@ -7,7 +7,9 @@ opencv-python>=4.5.0
 phosphobot>=0.0.13
 lerobot>=0.1.0
 openai>=1.0.0
-transformers>=4.20.0
+diffusers>=0.24.0
+huggingface_hub==0.20.3
+transformers>=4.33.3
 trimesh>=3.9.0
 pyBullet>=3.0.0
 scikit-learn>=1.0.0
@@ -17,4 +19,5 @@ segment-anything>=1.0
 clip>=0.2.0
 gymnasium>=0.28.0
 loguru>=0.6.0
+trimesh>=4.6.5
 pytorch3d>=0.7.8 # 
