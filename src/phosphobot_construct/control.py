@@ -319,14 +319,41 @@ def adaptive_control(
         else:
             target_position = target_positions
             
-        # Execute single movement
-        result = controller.move_to_position(
-            target_position=target_position,
-            timeout=timeout
-        )
+        # For single position movements with perception, create enhanced feedback function
+        if perception_func is not None:
+            def enhanced_feedback():
+                # Get joint positions
+                joint_positions = np.array(client.control.read_joints().angles_rad)
+                
+                # Update perception
+                try:
+                    scene = perception_func()
+                    enhanced_feedback.last_scene = scene
+                except Exception as e:
+                    logger.error(f"Error in perception: {str(e)}")
+                
+                return joint_positions
+                
+            # Initialize function attributes
+            enhanced_feedback.last_scene = None
+            
+            # Execute with enhanced feedback
+            result = controller.move_to_position(
+                target_position=target_position,
+                feedback_func=enhanced_feedback,  # Pass the feedback function
+                timeout=timeout
+            )
+            
+            # Add perception information
+            result["final_scene"] = enhanced_feedback.last_scene
+        else:
+            # Execute single movement without perception
+            result = controller.move_to_position(
+                target_position=target_position,
+                timeout=timeout
+            )
     
     return result
-
 
 if __name__ == "__main__":
     # Configure logging

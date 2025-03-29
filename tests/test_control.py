@@ -5,7 +5,7 @@ Unit tests for the phosphobot_construct.control module.
 import unittest
 import numpy as np
 import time
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock, call, ANY
 
 # Add parent directory to path to make imports work in testing
 import sys
@@ -241,7 +241,7 @@ class TestClosedLoopController(unittest.TestCase):
         self.assertEqual(self.controller.move_to_position.call_count, 3)
         
         # Check call arguments
-        calls = [call(target_position=wp, feedback_func=None, timeout=mock.ANY) 
+        calls = [call(target_position=wp, feedback_func=None, timeout=ANY) 
                  for wp in trajectory]
         self.controller.move_to_position.assert_has_calls(calls)
     
@@ -393,7 +393,7 @@ class TestAdaptiveControl(unittest.TestCase):
         
         # Check result
         self.assertEqual(result, {"success": True})
-    
+        
     @patch('src.phosphobot_construct.control.ClosedLoopController')
     def test_adaptive_control_with_perception(self, mock_controller_class):
         """Test adaptive control with perception function."""
@@ -435,9 +435,11 @@ class TestAdaptiveControl(unittest.TestCase):
         mock_perception.assert_called_once()
         self.assertIsInstance(feedback_result, np.ndarray)
         
-        # Check final result
-        self.assertEqual(result, {"success": True})
-
+        # Check final result - only verify that 'success' is True and don't care about other keys
+        self.assertTrue(result['success'])
+        
+        # Verify the final_scene key exists in the result
+        self.assertIn('final_scene', result)
 
 if __name__ == "__main__":
     unittest.main()
