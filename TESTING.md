@@ -48,26 +48,6 @@ phosphobot-env\Scripts\activate     # On Windows
 
 ### Installing Dependencies
 
-#### Minimal Installation (Core Testing)
-
-```bash
-# Install the package with dev dependencies
-pip install -e ".[dev]"
-
-# Install testing tools
-pip install pytest pytest-cov
-```
-
-#### Full Installation (All Features)
-
-```bash
-# Install all dependencies including optional ones
-pip install -e ".[dev,full]"
-
-# Install additional dependencies for hardware testing
-pip install phosphobot
-```
-
 #### Installing Only Dependencies (Without the Package)
 
 If you want to install just the dependencies without installing the Phosphobot Construct package itself:
@@ -94,7 +74,27 @@ This approach is useful for:
 - Testing compatibility with specific dependency versions
 - CI/CD environments where you want to install dependencies first
 
-#### Installing Specific Dependencies
+
+#### Minimal Installation (Core Testing)
+
+```bash
+# Install the package with dev dependencies
+pip install -e ".[dev]"
+
+# Install testing tools
+pip install pytest pytest-cov
+```
+
+#### Full Installation (All Features)
+
+```bash
+# Install all dependencies including optional ones
+pip install -e ".[dev,full]"
+
+# Install additional dependencies for hardware testing
+pip install phosphobot
+```
+
 
 ## Running Tests
 
