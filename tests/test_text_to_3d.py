@@ -3,16 +3,12 @@ Unit tests for the phosphobot_construct.text_to_3d module.
 """
 
 import unittest
-import os
+import os, sys
 import json
 import tempfile
 import shutil
 import numpy as np
 from unittest.mock import patch, MagicMock, PropertyMock
-
-# Add parent directory to path to make imports work in testing
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Mock torch and diffusers since they're optional dependencies
 sys.modules['torch'] = MagicMock()
@@ -20,7 +16,6 @@ sys.modules['diffusers'] = MagicMock()
 sys.modules['diffusers.ShapEPipeline'] = MagicMock()
 sys.modules['trimesh'] = MagicMock()
 
-# Import the module under test with mocked dependencies
 from src.phosphobot_construct.text_to_3d import TextTo3DConverter, convert_scenarios_to_3d
 
 

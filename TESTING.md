@@ -18,10 +18,83 @@ Install the testing dependencies:
 ```bash
 # Install testing dependencies
 pip install pytest pytest-cov
+```
 
+Install development version (NOT AVAILABLE):
+
+```bash
 # Install development version of the package
 pip install -e ".[dev]"
 ```
+
+## Setting Up the Testing Environment
+
+### Creating a Virtual Environment
+
+It's recommended to use a virtual environment for testing to avoid conflicts with other packages:
+
+```bash
+# Using venv (Python 3.3+)
+python -m venv phosphobot-env
+source phosphobot-env/bin/activate  # On Linux/macOS
+phosphobot-env\Scripts\activate     # On Windows
+
+# Or using virtualenv
+pip install virtualenv
+virtualenv phosphobot-env
+source phosphobot-env/bin/activate  # On Linux/macOS
+phosphobot-env\Scripts\activate     # On Windows
+```
+
+### Installing Dependencies
+
+#### Minimal Installation (Core Testing)
+
+```bash
+# Install the package with dev dependencies
+pip install -e ".[dev]"
+
+# Install testing tools
+pip install pytest pytest-cov
+```
+
+#### Full Installation (All Features)
+
+```bash
+# Install all dependencies including optional ones
+pip install -e ".[dev,full]"
+
+# Install additional dependencies for hardware testing
+pip install phosphobot
+```
+
+#### Installing Only Dependencies (Without the Package)
+
+If you want to install just the dependencies without installing the Phosphobot Construct package itself:
+
+```bash
+# Core dependencies only
+pip install numpy torch opencv-python phosphobot openai transformers
+
+# Testing dependencies
+pip install pytest pytest-cov mock black mypy
+
+# All optional dependencies
+pip install pytorch3d stable-baselines3 gymnasium trimesh diffusers pybullet 
+pip install segment-anything clip scikit-learn matplotlib
+
+# Install from requirements files
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pip install -r requirements-optional.txt
+```
+
+This approach is useful for:
+- Setting up a development environment before installing the package
+- Testing compatibility with specific dependency versions
+- CI/CD environments where you want to install dependencies first
+
+#### Installing Specific Dependencies
 
 ## Running Tests
 
