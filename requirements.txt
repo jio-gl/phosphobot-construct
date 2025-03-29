@@ -1,5 +1,5 @@
 numpy>=1.20.0
-stable-baselines3>=2.6.0
+stable-baselines3>=2.2.1
 fvcore>=0.1.5
 iopath>=0.1.10
 torch==2.2.2
