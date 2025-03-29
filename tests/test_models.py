@@ -85,6 +85,10 @@ class TestPhosphoConstructModel(unittest.TestCase):
         with tempfile.NamedTemporaryFile(suffix=".pt") as tmp_file:
             model_path = tmp_file.name
             
+            # Before sampling from the *original* model:
+            self.model.eval()
+            original_actions = self.model.sample_actions(self.dummy_inputs)
+
             # Save model
             self.model.save_model(model_path)
             
@@ -93,6 +97,7 @@ class TestPhosphoConstructModel(unittest.TestCase):
             
             # Create new model and load weights
             loaded_model = PhosphoConstructModel(model_path=model_path, device="cpu")
+            loaded_model.eval()
             
             # Sample actions from both models
             original_actions = self.model.sample_actions(self.dummy_inputs)

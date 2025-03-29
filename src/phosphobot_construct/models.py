@@ -8,7 +8,7 @@ control the phosphobot robot arm based on visual and proprioceptive input.
 import numpy as np
 import torch
 import torch.nn as nn
-from phosphobot.am import ActionModel
+from src.phosphobot_construct.am import ActionModel
 from typing import Dict, List, Optional, Union, Any
 
 
@@ -173,6 +173,10 @@ class PhosphoConstructModel(ActionModel):
         # Take output of last sequence element and predict actions
         actions = self.action_head(transformer_output[-1])
         
+        # Remove the leading [1, ...] if you always want shape [6].
+        # (only do this if your batch_size is always 1 in your test)
+        actions = actions.squeeze(0)
+
         return actions
     
     def sample_actions(self, inputs: Dict[str, Any]) -> np.ndarray:

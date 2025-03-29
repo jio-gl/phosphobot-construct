@@ -5,6 +5,7 @@ iopath>=0.1.10
 torch>=2.0.0
 opencv-python>=4.5.0
 phosphobot>=0.0.13
+lerobot>=0.1.0
 openai>=1.0.0
 transformers>=4.20.0
 trimesh>=3.9.0
