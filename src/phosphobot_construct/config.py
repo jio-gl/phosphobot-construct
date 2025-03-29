@@ -211,15 +211,18 @@ class ConfigManager:
                 return default
         
         return value
-    
+        
     def set(self, key: str, value: Any) -> None:
         """
-        Set a configuration value by key.
+        Set a configuration value by key with intelligent type conversion.
         
         Args:
             key: Configuration key (dot notation for nested keys).
             value: Value to set.
         """
+        # Perform intelligent type conversion
+        value = self._convert_value_type(key, value)
+        
         # Split key into parts
         parts = key.split(".")
         
@@ -232,6 +235,73 @@ class ConfigManager:
         
         # Set the value
         config[parts[-1]] = value
+
+    def _convert_value_type(self, key: str, value: Any) -> Any:
+        """
+        Convert value to the appropriate type based on key and existing values.
+        
+        Args:
+            key: Configuration key.
+            value: Value to convert.
+            
+        Returns:
+            Converted value.
+        """
+        # Skip conversion for None or non-string values
+        if value is None or not isinstance(value, str):
+            return value
+        
+        # Get current value if exists
+        current_value = self.get(key)
+        
+        # Try to match the type of the current value
+        if current_value is not None:
+            if isinstance(current_value, bool):
+                # Convert to boolean
+                return value.lower() in ('true', 'yes', '1', 'y', 'on')
+            elif isinstance(current_value, int):
+                # Convert to integer
+                try:
+                    return int(value)
+                except ValueError:
+                    pass
+            elif isinstance(current_value, float):
+                # Convert to float
+                try:
+                    return float(value)
+                except ValueError:
+                    pass
+            elif isinstance(current_value, list):
+                # Try to parse as JSON list
+                try:
+                    import json
+                    parsed = json.loads(value)
+                    if isinstance(parsed, list):
+                        return parsed
+                except json.JSONDecodeError:
+                    # Try comma-separated list
+                    return [item.strip() for item in value.split(',')]
+        
+        # Apply generic conversions for strings
+        if value.lower() in ('true', 'yes', 'y', 'on'):
+            return True
+        elif value.lower() in ('false', 'no', 'n', 'off'):
+            return False
+        elif value.isdigit():
+            return int(value)
+        elif self._is_float(value):
+            return float(value)
+            
+        # Keep as string if no conversion applies
+        return value
+
+    def _is_float(self, value: str) -> bool:
+        """Check if a string can be converted to float."""
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
     
     def save_config(self, config_path: str) -> bool:
         """
@@ -289,7 +359,7 @@ class ConfigManager:
                 # Set the value
                 self.set(config_key, parsed_value)
                 logger.debug(f"Updated config from environment: {config_key}={parsed_value}")
-    
+                
     def update_from_args(self, args: argparse.Namespace) -> None:
         """
         Update configuration from command-line arguments.
@@ -300,16 +370,40 @@ class ConfigManager:
         # Convert args to dictionary
         args_dict = vars(args)
         
+        # Track updates for debugging
+        updated_keys = []
+        
         # Update config with args
         for key, value in args_dict.items():
             if value is not None:
-                # Convert key from snake_case to dot notation
-                config_key = key.replace("_", ".")
+                # Split the key at each underscore that separates sections
+                # This handles keys like simulation_use_physics correctly
+                parts = key.split('_')
                 
-                # Set the value
-                self.set(config_key, value)
-                logger.debug(f"Updated config from args: {config_key}={value}")
-    
+                # First part is the section (e.g., 'simulation')
+                section = parts[0]
+                
+                # The rest is the field path (could be multiple parts)
+                if len(parts) > 1:
+                    field = '.'.join(parts[1:])
+                    config_key = f"{section}.{field}"
+                else:
+                    config_key = section
+                
+                # Get current value for comparison
+                current_value = self.get(config_key)
+                
+                # Only update if the value is different (prevents overwriting with the same value)
+                if current_value != value:
+                    # Set the value
+                    self.set(config_key, value)
+                    updated_keys.append((config_key, current_value, value))
+                    logger.debug(f"Updated config from args: {config_key}={value} (was {current_value})")
+        
+        # Log summary of updates
+        if updated_keys:
+            logger.info(f"Updated {len(updated_keys)} configuration values from command-line arguments")
+            
     def get_all(self) -> Dict[str, Any]:
         """
         Get the entire configuration.
