@@ -1,5 +1,8 @@
 # Phosphobot Construct Usage Guide
 
+![image](https://github.com/user-attachments/assets/3770e080-7eaa-440a-9bd5-8bfcffee0747)
+
+
 This guide explains how to use Phosphobot Construct for robot training and control.
 
 ## Getting Started

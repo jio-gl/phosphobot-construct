@@ -1,5 +1,8 @@
 # Installation Guide for Phosphobot Construct (WIP)
 
+![image](https://github.com/user-attachments/assets/6ff83c49-2134-4d99-ae1d-87b2673d2d71)
+
+
 This document explains how to install Phosphobot Construct and its dependencies.
 
 ## System Requirements
