@@ -1,6 +1,6 @@
 # The Philosophy Behind Phosphobot Construct
 
-![image](https://github.com/user-attachments/assets/11222e6f-cd4e-4704-9f1d-12a6f10b9bd0)
+![image](https://github.com/user-attachments/assets/eaeeafbb-0b3a-4994-8002-4c66845caeb4)
 
 
 We explore the cognitive science concepts behind the Phosphobot Construct project and its connection to "The Construct" from The Matrix, highlighting the principles of on-the-fly learning, perception-action bridging, and embodied intelligence.
