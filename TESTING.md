@@ -68,35 +68,33 @@ pip install -e ".[dev,full]"
 pip install phosphobot
 ```
 
+#### Installing Only Dependencies (Without the Package)
+
+If you want to install just the dependencies without installing the Phosphobot Construct package itself:
+
+```bash
+# Core dependencies only
+pip install numpy torch opencv-python phosphobot openai transformers
+
+# Testing dependencies
+pip install pytest pytest-cov mock black mypy
+
+# All optional dependencies
+pip install pytorch3d stable-baselines3 gymnasium trimesh diffusers pybullet 
+pip install segment-anything clip scikit-learn matplotlib
+
+# Install from requirements files
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pip install -r requirements-optional.txt
+```
+
+This approach is useful for:
+- Setting up a development environment before installing the package
+- Testing compatibility with specific dependency versions
+- CI/CD environments where you want to install dependencies first
+
 #### Installing Specific Dependencies
-
-If you only want to test specific modules, you can install their dependencies:
-
-```bash
-# For perception testing
-pip install opencv-python clip segment-anything torch
-
-# For 3D conversion testing
-pip install diffusers trimesh torch
-
-# For reinforcement learning testing
-pip install stable-baselines3 gymnasium torch
-
-# For simulation testing
-pip install pybullet numpy
-```
-
-### Verifying Installation
-
-To verify your installation is ready for testing:
-
-```bash
-# Check installed packages
-pip list | grep -E 'phosphobot|pytest|torch'
-
-# Run a simple test to check imports
-python -c "from phosphobot_construct.models import PhosphoConstructModel; print('Import successful!')"
-```
 
 ## Running Tests
 
