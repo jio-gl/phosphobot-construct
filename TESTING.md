@@ -18,7 +18,11 @@ Install the testing dependencies:
 ```bash
 # Install testing dependencies
 pip install pytest pytest-cov
+```
 
+Install development version (NOT AVAILABLE):
+
+```bash
 # Install development version of the package
 pip install -e ".[dev]"
 ```
