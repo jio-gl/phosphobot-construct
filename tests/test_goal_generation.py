@@ -1,5 +1,5 @@
 """
-Unit tests for the phosphobot_construct.goal_generator module.
+Unit tests for the phosphobot_construct.goal_generation module.
 """
 
 import unittest
@@ -7,13 +7,13 @@ import os
 import json
 import tempfile
 import shutil
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 
 # Add parent directory to path to make imports work in testing
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.phosphobot_construct.goal_generator import GoalGenerator, generate_goals_for_scenarios
+from src.phosphobot_construct.goal_generation import GoalGenerator, generate_goals_for_scenarios
 
 
 class TestGoalGenerator(unittest.TestCase):
@@ -84,7 +84,8 @@ class TestGoalGenerator(unittest.TestCase):
         # Remove temporary directory
         shutil.rmtree(self.test_dir)
     
-    @patch('src.phosphobot_construct.goal_generator.OpenAI')
+    # Patch the GoalGenerator.__init__ method to avoid API key requirement
+    @patch('src.phosphobot_construct.goal_generation.OpenAI')
     def test_init(self, mock_openai_class):
         """Test initialization of GoalGenerator."""
         # Setup mock
@@ -102,10 +103,16 @@ class TestGoalGenerator(unittest.TestCase):
         self.assertIsInstance(generator.system_prompt, str)
         self.assertIn("robotics task planner", generator.system_prompt.lower())
     
-    def test_format_scenario_description(self):
+    # Mock the GoalGenerator.__init__ method completely
+    @patch('src.phosphobot_construct.goal_generation.GoalGenerator.__init__', return_value=None)
+    def test_format_scenario_description(self, mock_init):
         """Test formatting scenario into a structured description."""
-        # Create generator
+        # Create generator with mocked __init__
         generator = GoalGenerator()
+        
+        # Set required attributes that would normally be set in __init__
+        generator.client = MagicMock()
+        generator.system_prompt = "System prompt for testing"
         
         # Format scenario
         description = generator._format_scenario_description(self.sample_scenario)
@@ -121,7 +128,7 @@ class TestGoalGenerator(unittest.TestCase):
             obj_name = obj.get("name", "")
             self.assertIn(obj_name, description)
     
-    @patch('src.phosphobot_construct.goal_generator.OpenAI')
+    @patch('src.phosphobot_construct.goal_generation.OpenAI')
     def test_generate_goals_success(self, mock_openai_class):
         """Test successful goal generation."""
         # Setup mock response
@@ -137,7 +144,7 @@ class TestGoalGenerator(unittest.TestCase):
         mock_client.chat.completions.create.return_value = mock_response
         
         # Create generator
-        generator = GoalGenerator()
+        generator = GoalGenerator(api_key="test_key")
         
         # Generate goals
         goals = generator.generate_goals(self.sample_scenario, num_goals=1)
@@ -157,7 +164,7 @@ class TestGoalGenerator(unittest.TestCase):
         self.assertEqual(goals[0]["scenario_id"], "scenario_0001")
         self.assertEqual(goals[0]["instruction"], "Stack the red cube on top of the blue sphere.")
     
-    @patch('src.phosphobot_construct.goal_generator.OpenAI')
+    @patch('src.phosphobot_construct.goal_generation.OpenAI')
     def test_generate_goals_api_error(self, mock_openai_class):
         """Test goal generation when API raises an error."""
         # Setup mock to raise an exception
@@ -166,7 +173,7 @@ class TestGoalGenerator(unittest.TestCase):
         mock_client.chat.completions.create.side_effect = Exception("API error")
         
         # Create generator
-        generator = GoalGenerator()
+        generator = GoalGenerator(api_key="test_key")
         
         # Generate goals (should return empty list on error)
         goals = generator.generate_goals(self.sample_scenario, num_goals=1)
@@ -174,10 +181,15 @@ class TestGoalGenerator(unittest.TestCase):
         # Check that an empty list was returned
         self.assertEqual(goals, [])
     
-    def test_save_goals(self):
+    # Mock the GoalGenerator.__init__ method to avoid API key requirement
+    @patch('src.phosphobot_construct.goal_generation.GoalGenerator.__init__', return_value=None)
+    def test_save_goals(self, mock_init):
         """Test saving goals to files."""
-        # Create generator
+        # Create generator with mocked __init__
         generator = GoalGenerator()
+        
+        # Set required attributes that would normally be set in __init__
+        generator.client = MagicMock()
         
         # Create goals output directory
         goals_dir = os.path.join(self.test_dir, "goals")
@@ -196,10 +208,15 @@ class TestGoalGenerator(unittest.TestCase):
         self.assertEqual(saved_goal["id"], self.sample_goal["id"])
         self.assertEqual(saved_goal["instruction"], self.sample_goal["instruction"])
     
-    def test_load_goals(self):
+    # Mock the GoalGenerator.__init__ method to avoid API key requirement
+    @patch('src.phosphobot_construct.goal_generation.GoalGenerator.__init__', return_value=None)
+    def test_load_goals(self, mock_init):
         """Test loading goals from files."""
-        # Create generator
+        # Create generator with mocked __init__
         generator = GoalGenerator()
+        
+        # Set required attributes that would normally be set in __init__
+        generator.client = MagicMock()
         
         # Create goals directory
         goals_dir = os.path.join(self.test_dir, "goals")
@@ -218,10 +235,15 @@ class TestGoalGenerator(unittest.TestCase):
         self.assertEqual(goals[0]["id"], self.sample_goal["id"])
         self.assertEqual(goals[0]["instruction"], self.sample_goal["instruction"])
     
-    def test_load_goals_with_scenario_filter(self):
+    # Mock the GoalGenerator.__init__ method to avoid API key requirement
+    @patch('src.phosphobot_construct.goal_generation.GoalGenerator.__init__', return_value=None)
+    def test_load_goals_with_scenario_filter(self, mock_init):
         """Test loading goals with scenario filter."""
-        # Create generator
+        # Create generator with mocked __init__
         generator = GoalGenerator()
+        
+        # Set required attributes that would normally be set in __init__
+        generator.client = MagicMock()
         
         # Create goals directory
         goals_dir = os.path.join(self.test_dir, "goals")
@@ -247,10 +269,15 @@ class TestGoalGenerator(unittest.TestCase):
         self.assertEqual(goals[0]["id"], self.sample_goal["id"])
         self.assertEqual(goals[0]["scenario_id"], "scenario_0001")
     
-    def test_load_goals_invalid_directory(self):
+    # Mock the GoalGenerator.__init__ method to avoid API key requirement
+    @patch('src.phosphobot_construct.goal_generation.GoalGenerator.__init__', return_value=None)
+    def test_load_goals_invalid_directory(self, mock_init):
         """Test loading goals from non-existent directory."""
-        # Create generator
+        # Create generator with mocked __init__
         generator = GoalGenerator()
+        
+        # Set required attributes that would normally be set in __init__
+        generator.client = MagicMock()
         
         # Load goals from non-existent directory
         goals = generator.load_goals(os.path.join(self.test_dir, "nonexistent"))
@@ -258,10 +285,15 @@ class TestGoalGenerator(unittest.TestCase):
         # Check that an empty list was returned
         self.assertEqual(goals, [])
     
-    def test_load_goals_invalid_file(self):
+    # Mock the GoalGenerator.__init__ method to avoid API key requirement
+    @patch('src.phosphobot_construct.goal_generation.GoalGenerator.__init__', return_value=None)
+    def test_load_goals_invalid_file(self, mock_init):
         """Test loading goals with an invalid JSON file."""
-        # Create generator
+        # Create generator with mocked __init__
         generator = GoalGenerator()
+        
+        # Set required attributes that would normally be set in __init__
+        generator.client = MagicMock()
         
         # Create goals directory
         goals_dir = os.path.join(self.test_dir, "goals")
@@ -285,7 +317,8 @@ class TestGoalGenerator(unittest.TestCase):
         self.assertEqual(goals[0]["id"], self.sample_goal["id"])
 
 
-@patch('src.phosphobot_construct.goal_generator.GoalGenerator')
+# Test for standalone function
+@patch('src.phosphobot_construct.goal_generation.GoalGenerator')
 def test_generate_goals_for_scenarios(mock_generator_class):
     """Test the generate_goals_for_scenarios function."""
     # Setup mocks
@@ -319,13 +352,13 @@ def test_generate_goals_for_scenarios(mock_generator_class):
             mock_generator_class.assert_called_once()
             
             # Check generate_goals calls
-            self.assertEqual(mock_generator.generate_goals.call_count, 2)
+            assert mock_generator.generate_goals.call_count == 2
             
             # Check save_goals calls
-            self.assertEqual(mock_generator.save_goals.call_count, 2)
+            assert mock_generator.save_goals.call_count == 2
             first_save_call = mock_generator.save_goals.call_args_list[0]
-            self.assertEqual(first_save_call[0][0], [{"id": "goal_1"}, {"id": "goal_2"}])
-            self.assertEqual(first_save_call[0][1], goals_dir)
+            assert first_save_call[0][0] == [{"id": "goal_1"}, {"id": "goal_2"}]
+            assert first_save_call[0][1] == goals_dir
 
 
 if __name__ == "__main__":
