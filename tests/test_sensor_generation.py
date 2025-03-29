@@ -3,29 +3,36 @@ import numpy as np
 import os
 import tempfile
 import shutil
-from unittest.mock import patch, MagicMock
-
 import sys
+import pytest
+from unittest.mock import MagicMock
+
+# Ensure project root is in path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Mock torch and pytorch3d globally before importing the module under test
-mock_torch = MagicMock()
-mock_torch.device = MagicMock(return_value="mock_device")
-mock_torch.cuda.is_available = MagicMock(return_value=True)
-mock_torch.ones_like = MagicMock(side_effect=lambda x: x)
-mock_torch.cat = MagicMock(side_effect=lambda tensors, dim: tensors[0])
-mock_torch.ones = MagicMock()
-mock_torch.zeros = MagicMock()
-mock_torch.tensor = MagicMock()
 
-sys.modules['torch'] = mock_torch
-sys.modules['torch.nn'] = MagicMock()
-sys.modules['pytorch3d'] = MagicMock()
-sys.modules['pytorch3d.io'] = MagicMock()
-sys.modules['pytorch3d.renderer'] = MagicMock()
-sys.modules['pytorch3d.structures'] = MagicMock()
+@pytest.fixture(autouse=True)
+def mock_deps(monkeypatch):
+    """Mock torch and pytorch3d only for this test file, per test function."""
+    mock_torch = MagicMock()
+    mock_torch.device = MagicMock(return_value="mock_device")
+    mock_torch.cuda.is_available = MagicMock(return_value=True)
+    mock_torch.ones_like = MagicMock(side_effect=lambda x: x)
+    mock_torch.cat = MagicMock(side_effect=lambda tensors, dim: tensors[0])
+    mock_torch.ones = MagicMock()
+    mock_torch.zeros = MagicMock()
+    mock_torch.tensor = MagicMock()
 
-from src.phosphobot_construct.sensor_generation import SensorGenerator
+    monkeypatch.setitem(sys.modules, "torch", mock_torch)
+    monkeypatch.setitem(sys.modules, "torch.nn", MagicMock())
+    monkeypatch.setitem(sys.modules, "pytorch3d", MagicMock())
+    monkeypatch.setitem(sys.modules, "pytorch3d.io", MagicMock())
+    monkeypatch.setitem(sys.modules, "pytorch3d.renderer", MagicMock())
+    monkeypatch.setitem(sys.modules, "pytorch3d.structures", MagicMock())
+
+    # Import the module after mocking
+    global SensorGenerator
+    from src.phosphobot_construct.sensor_generation import SensorGenerator
 
 
 class TestSensorGeneratorBasic(unittest.TestCase):

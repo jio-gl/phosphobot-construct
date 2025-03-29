@@ -1,0 +1,162 @@
+"""
+Unit tests for the phosphobot_construct.policy module, without global mock pollution.
+"""
+
+import unittest
+from unittest.mock import patch, MagicMock, PropertyMock
+import numpy as np
+import torch
+
+from src.phosphobot_construct.policy import PolicyExecutor, execute_policy
+
+
+class TestPolicyExecutor(unittest.TestCase):
+    def setUp(self):
+        self.sample_scene = {
+            "objects": [
+                {"class": "a red cube", "position_3d": {"x": 0.1, "y": 0.2, "z": 0.3}},
+                {"class": "a blue sphere", "position_3d": {"x": -0.2, "y": 0.1, "z": 0.1}}
+            ],
+            "robot_state": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+        }
+
+        self.sample_goal = {
+            "objects": [
+                {"class": "a red cube", "goal_position": {"x": 0.1, "y": 0.2, "z": 0.5}},
+                {"class": "a blue sphere", "goal_position": {"x": -0.2, "y": 0.1, "z": 0.1}}
+            ]
+        }
+
+    @patch("src.phosphobot_construct.policy.PPO.load")
+    @patch("src.phosphobot_construct.policy.VecNormalize.load")
+    @patch("src.phosphobot_construct.policy.os.path.exists", return_value=True)
+    @patch("src.phosphobot_construct.policy.HAS_SB3", True)
+    @patch("src.phosphobot_construct.policy.torch.device")
+    def test_init_success(self, mock_device, mock_exists, mock_vec_load, mock_ppo_load):
+        mock_device.return_value = "cuda_device"
+        mock_model = MagicMock()
+        mock_env = MagicMock()
+        mock_ppo_load.return_value = mock_model
+        mock_vec_load.return_value = mock_env
+
+        executor = PolicyExecutor("models/mock_model.zip", "models/mock_env.pkl", "cuda")
+
+        self.assertEqual(executor.device, "cuda_device")
+        self.assertEqual(executor.model, mock_model)
+        self.assertEqual(executor.env, mock_env)
+        self.assertTrue(executor.loaded)
+
+    @patch("src.phosphobot_construct.policy.os.path.exists", return_value=False)
+    @patch("src.phosphobot_construct.policy.HAS_SB3", True)
+    def test_init_model_not_found(self, *_):
+        executor = PolicyExecutor("models/missing_model.zip", device="cpu")
+        self.assertFalse(executor.loaded)
+        self.assertIsNone(executor.model)
+
+    @patch("src.phosphobot_construct.policy.HAS_SB3", False)
+    def test_init_sb3_unavailable(self):
+        executor = PolicyExecutor("models/mock_model.zip", device="cpu")
+        self.assertFalse(executor.loaded)
+
+    def test_preprocess_observation_with_state(self):
+        executor = PolicyExecutor("mock", device="cpu")
+        executor.loaded = True
+        executor.model = MagicMock()
+        executor.env = None
+        obs = executor.preprocess_observation(self.sample_scene, self.sample_goal)
+        self.assertEqual(obs["state"].shape, (6,))
+        self.assertIn("image", obs)
+
+    def test_preprocess_observation_no_state(self):
+        executor = PolicyExecutor("mock", device="cpu")
+        executor.loaded = True
+        executor.model = MagicMock()
+        executor.env = None
+        obs = executor.preprocess_observation({"objects": []}, self.sample_goal)
+        self.assertEqual(obs["state"].shape, (12,))
+        self.assertEqual(obs["state"].dtype, np.float32)
+
+    def test_predict_action_model_missing(self):
+        executor = PolicyExecutor("mock", device="cpu")
+        executor.loaded = False
+        executor.model = None
+        observation = {"state": np.zeros(12), "image": np.zeros((64, 64, 4))}
+        with patch("src.phosphobot_construct.policy.logger") as mock_logger:
+            action, info = executor.predict_action(observation)
+            mock_logger.error.assert_called_once()
+            np.testing.assert_array_equal(action, np.zeros(6))
+
+    def test_predict_action_model_error(self):
+        executor = PolicyExecutor("mock", device="cpu")
+        executor.loaded = True
+        executor.model = MagicMock()
+        executor.model.predict.side_effect = Exception("Oops")
+        observation = {"state": np.zeros(12), "image": np.zeros((64, 64, 4))}
+        action, info = executor.predict_action(observation)
+        self.assertIn("error", info)
+        np.testing.assert_array_equal(action, np.zeros(6))
+
+    def test_generate_trajectory(self):
+        executor = PolicyExecutor("mock", device="cpu")
+        executor.loaded = True
+        executor.model = MagicMock()
+        executor.model.predict.return_value = (np.ones(6), {})
+        trajectory = executor.generate_trajectory(self.sample_scene, self.sample_goal, num_steps=3)
+        self.assertEqual(len(trajectory), 3)
+        for step in trajectory:
+            np.testing.assert_array_equal(step, np.ones(6))
+
+
+class TestExecutePolicy(unittest.TestCase):
+    @patch("src.phosphobot_construct.policy.PolicyExecutor")
+    @patch("src.phosphobot_construct.policy.time.sleep", return_value=None)
+    def test_execute_policy_success(self, _, mock_executor_class):
+        mock_executor = MagicMock()
+        mock_executor.loaded = True
+        mock_executor.predict_action.side_effect = [
+            (np.ones(6), {"check_goal": False}) for _ in range(4)
+        ] + [(np.ones(6), {"check_goal": True})]
+        mock_executor_class.return_value = mock_executor
+
+        client = MagicMock()
+        client.control.read_joints.return_value.angles_rad = [0.0] * 6
+
+        from src.phosphobot_construct.policy import execute_policy
+
+        result = execute_policy(
+            model_path="models/mock_model.zip",
+            scene_3d={"objects": [], "robot_state": [0.0] * 6},
+            goal_3d={"objects": []},
+            client=client,
+            max_steps=10
+        )
+
+        self.assertTrue(result["success"])
+        self.assertEqual(len(result["trajectory"]), 5)
+        self.assertEqual(result["steps"], 5)
+
+    @patch("src.phosphobot_construct.policy.PolicyExecutor")
+    def test_execute_policy_model_not_loaded(self, mock_executor_class):
+        mock_executor = MagicMock()
+        mock_executor.loaded = False
+        mock_executor_class.return_value = mock_executor
+        result = execute_policy("path", {}, {}, MagicMock())
+        self.assertFalse(result["success"])
+
+    @patch("src.phosphobot_construct.policy.PolicyExecutor")
+    def test_execute_policy_with_client_error(self, mock_executor_class):
+        mock_executor = MagicMock()
+        mock_executor.loaded = True
+        mock_executor.predict_action.return_value = (np.ones(6), {"check_goal": False})
+        mock_executor_class.return_value = mock_executor
+
+        client = MagicMock()
+        client.control.read_joints.side_effect = Exception("Failure")
+
+        result = execute_policy("path", {}, {}, client)
+        self.assertFalse(result["success"])
+        self.assertIn("error", result)
+
+
+if __name__ == "__main__":
+    unittest.main()

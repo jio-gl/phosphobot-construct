@@ -2,12 +2,14 @@ numpy>=1.20.0
 stable-baselines3>=2.6.0
 fvcore>=0.1.5
 iopath>=0.1.10
-torch>=2.0.0
+torch==2.2.2
+torchvision==0.17.2
+diffusers==0.26.3
+gym==0.26.2
+lerobot==0.1.0
 opencv-python>=4.5.0
 phosphobot>=0.0.13
-lerobot>=0.1.0
 openai>=1.0.0
-diffusers>=0.24.0
 huggingface_hub==0.20.3
 transformers>=4.33.3
 trimesh>=3.9.0

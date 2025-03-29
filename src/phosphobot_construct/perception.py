@@ -66,6 +66,7 @@ class SceneUnderstanding:
         # Initialize SAM for segmentation if available
         self.sam_predictor = None
         if HAS_SAM:
+            from segment_anything import SamPredictor, sam_model_registry
             try:
                 logger.info(f"Loading SAM model from {sam_checkpoint} on {self.device}")
                 sam = sam_model_registry["vit_h"](checkpoint=sam_checkpoint)
