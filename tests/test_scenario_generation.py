@@ -1,5 +1,5 @@
 """
-Unit tests for the phosphobot_construct.scenario_generator module.
+Unit tests for the phosphobot_construct.scenario_generation module.
 """
 
 import unittest
@@ -13,7 +13,7 @@ from unittest.mock import patch, MagicMock
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.phosphobot_construct.scenario_generator import ScenarioGenerator, generate_tabletop_scenarios
+from src.phosphobot_construct.scenario_generation import ScenarioGenerator, generate_tabletop_scenarios
 
 
 class TestScenarioGenerator(unittest.TestCase):
@@ -72,7 +72,7 @@ class TestScenarioGenerator(unittest.TestCase):
         # Remove temporary directory
         shutil.rmtree(self.test_dir)
     
-    @patch('src.phosphobot_construct.scenario_generator.OpenAI')
+    @patch('src.phosphobot_construct.scenario_generation.OpenAI')
     def test_init(self, mock_openai_class):
         """Test initialization of ScenarioGenerator."""
         # Setup mock
@@ -90,7 +90,7 @@ class TestScenarioGenerator(unittest.TestCase):
         self.assertIsInstance(generator.system_prompt, str)
         self.assertIn("robotics training data generator", generator.system_prompt.lower())
     
-    @patch('src.phosphobot_construct.scenario_generator.OpenAI')
+    @patch('src.phosphobot_construct.scenario_generation.OpenAI')
     def test_generate_scenarios_success(self, mock_openai_class):
         """Test successful scenario generation."""
         # Setup mock response
@@ -104,7 +104,7 @@ class TestScenarioGenerator(unittest.TestCase):
         mock_client.chat.completions.create.return_value = mock_response
         
         # Create generator
-        generator = ScenarioGenerator()
+        generator = ScenarioGenerator(api_key="test_key")
         
         # Generate scenarios
         scenarios = generator.generate_scenarios(num_scenarios=1, task_domain="tabletop")
@@ -127,7 +127,7 @@ class TestScenarioGenerator(unittest.TestCase):
         self.assertEqual(scenarios[0]["id"], "scenario_0001")
         self.assertEqual(scenarios[0]["description"], self.sample_scenario["description"])
     
-    @patch('src.phosphobot_construct.scenario_generator.OpenAI')
+    @patch('src.phosphobot_construct.scenario_generation.OpenAI')
     def test_generate_scenarios_batch(self, mock_openai_class):
         """Test generating multiple scenarios."""
         # Setup mock response
@@ -150,7 +150,7 @@ class TestScenarioGenerator(unittest.TestCase):
         mock_client.chat.completions.create.side_effect = mock_responses
         
         # Create generator
-        generator = ScenarioGenerator()
+        generator = ScenarioGenerator(api_key="test_key")
         
         # Generate multiple scenarios
         scenarios = generator.generate_scenarios(num_scenarios=2, task_domain="mixed")
@@ -164,7 +164,7 @@ class TestScenarioGenerator(unittest.TestCase):
         self.assertEqual(scenarios[1]["id"], "scenario_0002")
         self.assertNotEqual(scenarios[0]["description"], scenarios[1]["description"])
     
-    @patch('src.phosphobot_construct.scenario_generator.OpenAI')
+    @patch('src.phosphobot_construct.scenario_generation.OpenAI')
     def test_generate_scenarios_api_error(self, mock_openai_class):
         """Test scenario generation when API raises an error."""
         # Setup mock to raise an exception
@@ -173,7 +173,7 @@ class TestScenarioGenerator(unittest.TestCase):
         mock_client.chat.completions.create.side_effect = Exception("API error")
         
         # Create generator
-        generator = ScenarioGenerator()
+        generator = ScenarioGenerator(api_key="test_key")
         
         # Generate scenarios (should continue and log error)
         scenarios = generator.generate_scenarios(num_scenarios=2, task_domain="tabletop")
@@ -181,10 +181,15 @@ class TestScenarioGenerator(unittest.TestCase):
         # Check that we got an empty list for the failed call
         self.assertEqual(len(scenarios), 0)
     
-    def test_save_scenarios(self):
+    # Mock the ScenarioGenerator.__init__ method to avoid API key requirement
+    @patch('src.phosphobot_construct.scenario_generation.ScenarioGenerator.__init__', return_value=None)
+    def test_save_scenarios(self, mock_init):
         """Test saving scenarios to files."""
-        # Create generator
+        # Create generator with mocked __init__
         generator = ScenarioGenerator()
+        
+        # Set required attributes that would normally be set in __init__
+        generator.client = MagicMock()
         
         # Create scenarios output directory
         scenarios_dir = os.path.join(self.test_dir, "scenarios")
@@ -203,10 +208,15 @@ class TestScenarioGenerator(unittest.TestCase):
         self.assertEqual(saved_scenario["id"], self.sample_scenario["id"])
         self.assertEqual(saved_scenario["description"], self.sample_scenario["description"])
     
-    def test_load_scenarios(self):
+    # Mock the ScenarioGenerator.__init__ method to avoid API key requirement
+    @patch('src.phosphobot_construct.scenario_generation.ScenarioGenerator.__init__', return_value=None)
+    def test_load_scenarios(self, mock_init):
         """Test loading scenarios from files."""
-        # Create generator
+        # Create generator with mocked __init__
         generator = ScenarioGenerator()
+        
+        # Set required attributes that would normally be set in __init__
+        generator.client = MagicMock()
         
         # Create scenarios directory
         scenarios_dir = os.path.join(self.test_dir, "scenarios")
@@ -225,10 +235,15 @@ class TestScenarioGenerator(unittest.TestCase):
         self.assertEqual(scenarios[0]["id"], self.sample_scenario["id"])
         self.assertEqual(scenarios[0]["description"], self.sample_scenario["description"])
     
-    def test_load_scenarios_multiple(self):
+    # Mock the ScenarioGenerator.__init__ method to avoid API key requirement
+    @patch('src.phosphobot_construct.scenario_generation.ScenarioGenerator.__init__', return_value=None)
+    def test_load_scenarios_multiple(self, mock_init):
         """Test loading multiple scenario files."""
-        # Create generator
+        # Create generator with mocked __init__
         generator = ScenarioGenerator()
+        
+        # Set required attributes that would normally be set in __init__
+        generator.client = MagicMock()
         
         # Create scenarios directory
         scenarios_dir = os.path.join(self.test_dir, "scenarios")
@@ -262,10 +277,15 @@ class TestScenarioGenerator(unittest.TestCase):
         self.assertEqual(scenario_dict["scenario_0001"]["description"], scenario1["description"])
         self.assertEqual(scenario_dict["scenario_0002"]["description"], scenario2["description"])
     
-    def test_load_scenarios_invalid_directory(self):
+    # Mock the ScenarioGenerator.__init__ method to avoid API key requirement
+    @patch('src.phosphobot_construct.scenario_generation.ScenarioGenerator.__init__', return_value=None)
+    def test_load_scenarios_invalid_directory(self, mock_init):
         """Test loading scenarios from non-existent directory."""
-        # Create generator
+        # Create generator with mocked __init__
         generator = ScenarioGenerator()
+        
+        # Set required attributes that would normally be set in __init__
+        generator.client = MagicMock()
         
         # Load scenarios from non-existent directory
         scenarios = generator.load_scenarios(os.path.join(self.test_dir, "nonexistent"))
@@ -273,10 +293,15 @@ class TestScenarioGenerator(unittest.TestCase):
         # Check that an empty list was returned
         self.assertEqual(scenarios, [])
     
-    def test_load_scenarios_invalid_file(self):
+    # Mock the ScenarioGenerator.__init__ method to avoid API key requirement
+    @patch('src.phosphobot_construct.scenario_generation.ScenarioGenerator.__init__', return_value=None)
+    def test_load_scenarios_invalid_file(self, mock_init):
         """Test loading scenarios with an invalid JSON file."""
-        # Create generator
+        # Create generator with mocked __init__
         generator = ScenarioGenerator()
+        
+        # Set required attributes that would normally be set in __init__
+        generator.client = MagicMock()
         
         # Create scenarios directory
         scenarios_dir = os.path.join(self.test_dir, "scenarios")
@@ -300,7 +325,8 @@ class TestScenarioGenerator(unittest.TestCase):
         self.assertEqual(scenarios[0]["id"], self.sample_scenario["id"])
 
 
-@patch('src.phosphobot_construct.scenario_generator.ScenarioGenerator')
+# Standalone test function (use assert instead of self.assertEqual)
+@patch('src.phosphobot_construct.scenario_generation.ScenarioGenerator')
 def test_generate_tabletop_scenarios(mock_generator_class):
     """Test the generate_tabletop_scenarios function."""
     # Setup mocks
@@ -324,8 +350,8 @@ def test_generate_tabletop_scenarios(mock_generator_class):
         # Check save_scenarios call
         mock_generator.save_scenarios.assert_called_once()
         args, kwargs = mock_generator.save_scenarios.call_args
-        self.assertEqual(args[0], [{"id": "scenario_0001"}, {"id": "scenario_0002"}])
-        self.assertEqual(args[1], output_dir)
+        assert args[0] == [{"id": "scenario_0001"}, {"id": "scenario_0002"}]
+        assert args[1] == output_dir
 
 
 if __name__ == "__main__":
