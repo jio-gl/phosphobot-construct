@@ -65,8 +65,6 @@ pip install segment-anything clip scikit-learn matplotlib
 
 # Install from requirements files
 pip install -r requirements.txt
-pip install -r requirements-dev.txt
-pip install -r requirements-optional.txt
 ```
 
 This approach is useful for:
