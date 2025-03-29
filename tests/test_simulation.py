@@ -71,8 +71,11 @@ class TestPhosphobotSimulator(unittest.TestCase):
         # Check that resetJointState was called with correct positions
         calls = mock_p.resetJointState.call_args_list[-len(custom_positions):]
         for i, pos in enumerate(custom_positions):
-            _, kwargs = calls[i]
-            self.assertEqual(kwargs["targetValue"], pos)
+            # Extract the positional arguments instead of keyword arguments
+            args, _ = calls[i]
+            # The target position is typically the third argument (index 2) in resetJointState
+            # resetJointState(bodyUniqueId, jointIndex, targetValue, ...)
+            self.assertEqual(args[2], pos)
     
     @patch('src.phosphobot_construct.simulation.p')
     def test_step_simulation(self, mock_p):
@@ -239,11 +242,11 @@ def test_create_box_stacking_env(mock_simulator_class):
     mock_simulator.load_objects.assert_called_once()
     
     # Check that step_simulation was called 100 times to let the simulation settle
-    self.assertEqual(mock_simulator.step_simulation.call_count, 100)
+    assert mock_simulator.step_simulation.call_count == 100
     
     # Check that the correct values were returned
-    self.assertEqual(sim, mock_simulator)
-    self.assertEqual(box_ids, [101, 102, 103])
+    assert sim == mock_simulator
+    assert box_ids == [101, 102, 103]
 
 
 if __name__ == "__main__":
