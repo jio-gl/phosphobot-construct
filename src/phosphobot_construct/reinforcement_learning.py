@@ -183,7 +183,11 @@ class RobotTransformerPolicy(nn.Module):
         
         if deterministic:
             # Return mean action
-            return action_mean, torch.zeros_like(action_mean)
+            batch_size = action_mean.shape[0]
+            actions = action_mean
+            # We want log_probs to be shape (batch_size,), so:
+            log_probs = torch.zeros(batch_size, dtype=action_mean.dtype, device=action_mean.device)
+            return actions, log_probs
         else:
             # Sample from normal distribution
             normal = torch.distributions.Normal(action_mean, action_std)
@@ -251,8 +255,8 @@ class RobotEnv(gym.Env):
             max_steps: Maximum number of steps per episode.
             reward_type: Type of reward function ('exponential', 'sparse', 'dense').
         """
-        super(RobotEnv, self).__init__()
-        
+        super().__init__()     
+
         # Environment parameters
         self.max_steps = max_steps
         self.reward_type = reward_type
@@ -492,7 +496,8 @@ class RobotEnv(gym.Env):
         # Check for success
         if distance < 0.05:
             self.success = True
-            reward += 10.0  # Success bonus
+            if self.reward_type != "sparse":
+                reward += 10.0
         
         return reward
     
