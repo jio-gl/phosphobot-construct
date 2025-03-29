@@ -20,4 +20,4 @@ clip>=0.2.0
 gymnasium>=0.28.0
 loguru>=0.6.0
 trimesh>=4.6.5
-pytorch3d>=0.7.8 # 
+#pytorch3d>=0.7.8 # 
