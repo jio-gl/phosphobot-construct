@@ -11,6 +11,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from typing import Dict, List, Optional, Union, Any, Tuple
+import cv2, logging
 
 # Import conditional to make the module work even without dependencies
 try:
