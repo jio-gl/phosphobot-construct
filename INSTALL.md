@@ -1,4 +1,4 @@
-# Installation Guide for Phosphobot Construct
+# Installation Guide for Phosphobot Construct (WIP)
 
 This document explains how to install Phosphobot Construct and its dependencies.
 
@@ -13,7 +13,7 @@ This document explains how to install Phosphobot Construct and its dependencies.
 
 ## Installation Methods
 
-### 1. Installation from source
+### 1. Installation from source (NOT AVAIALBLE YET)
 
 For the latest features or to contribute to development:
 
