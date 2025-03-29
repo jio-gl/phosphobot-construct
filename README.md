@@ -1,4 +1,4 @@
-# Phosphobot Construct: Robot Training with GenAI for Superhuman Skills
+# Phosphobot Construct: Robot Training w/GenAI for Superhuman Skills
 
 ![image](https://github.com/user-attachments/assets/89185655-a23c-4dc6-9215-94f7d49514d3)
 
