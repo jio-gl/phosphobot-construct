@@ -27,6 +27,77 @@ Install development version (NOT AVAILABLE):
 pip install -e ".[dev]"
 ```
 
+## Setting Up the Testing Environment
+
+### Creating a Virtual Environment
+
+It's recommended to use a virtual environment for testing to avoid conflicts with other packages:
+
+```bash
+# Using venv (Python 3.3+)
+python -m venv phosphobot-env
+source phosphobot-env/bin/activate  # On Linux/macOS
+phosphobot-env\Scripts\activate     # On Windows
+
+# Or using virtualenv
+pip install virtualenv
+virtualenv phosphobot-env
+source phosphobot-env/bin/activate  # On Linux/macOS
+phosphobot-env\Scripts\activate     # On Windows
+```
+
+### Installing Dependencies
+
+#### Minimal Installation (Core Testing)
+
+```bash
+# Install the package with dev dependencies
+pip install -e ".[dev]"
+
+# Install testing tools
+pip install pytest pytest-cov
+```
+
+#### Full Installation (All Features)
+
+```bash
+# Install all dependencies including optional ones
+pip install -e ".[dev,full]"
+
+# Install additional dependencies for hardware testing
+pip install phosphobot
+```
+
+#### Installing Specific Dependencies
+
+If you only want to test specific modules, you can install their dependencies:
+
+```bash
+# For perception testing
+pip install opencv-python clip segment-anything torch
+
+# For 3D conversion testing
+pip install diffusers trimesh torch
+
+# For reinforcement learning testing
+pip install stable-baselines3 gymnasium torch
+
+# For simulation testing
+pip install pybullet numpy
+```
+
+### Verifying Installation
+
+To verify your installation is ready for testing:
+
+```bash
+# Check installed packages
+pip list | grep -E 'phosphobot|pytest|torch'
+
+# Run a simple test to check imports
+python -c "from phosphobot_construct.models import PhosphoConstructModel; print('Import successful!')"
+```
+
 ## Running Tests
 
 ### Running All Tests
