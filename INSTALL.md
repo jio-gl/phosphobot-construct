@@ -13,7 +13,7 @@ This document explains how to install Phosphobot Construct and its dependencies.
 
 ## Installation Methods
 
-### 1. Installation from source (NOT AVAIALBLE YET)
+### 1. Installation from source (NOT AVAILABLE YET)
 
 For the latest features or to contribute to development:
 
