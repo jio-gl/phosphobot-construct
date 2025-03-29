@@ -134,7 +134,9 @@ The core of our approach uses deep reinforcement learning with transformer-based
 
 The reinforcement learning objective is to maximize the expected cumulative reward:
 
-$$J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)}\left[\sum_{t=0}^{T} \gamma^t r(s_t, a_t)\right]$$
+<p>
+  $$J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)}\left[\sum_{t=0}^{T} \gamma^t r(s_t, a_t)\right]$$
+</p>
 
 where $\tau = (s_0, a_0, s_1, a_1, ...)$ is a trajectory, $\gamma$ is the discount factor, and $r(s_t, a_t)$ is the reward function.
 
