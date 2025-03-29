@@ -12,6 +12,8 @@ import torch
 import torch.nn as nn
 from typing import Dict, List, Optional, Union, Any, Tuple
 
+import cv2
+
 logger = logging.getLogger(__name__)
 
 # Import conditional to make the module work even without dependencies
