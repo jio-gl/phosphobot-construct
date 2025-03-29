@@ -72,6 +72,8 @@ This approach is useful for:
 - Testing compatibility with specific dependency versions
 - CI/CD environments where you want to install dependencies first
 
+#### Installing Specific Dependencies (WIP)
+=======
 
 #### Minimal Installation (Core Testing)
 
@@ -92,7 +94,6 @@ pip install -e ".[dev,full]"
 # Install additional dependencies for hardware testing
 pip install phosphobot
 ```
-
 
 ## Running Tests
 

@@ -8,4 +8,4 @@ superhuman manipulation skills through multimodal learning approaches.
 __version__ = "0.1.0"
 
 # Import main classes for easy access
-from phosphobot_construct.models import PhosphoConstructModel
+#from src.phosphobot_construct.models import PhosphoConstructModel
