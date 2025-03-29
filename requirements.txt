@@ -5,6 +5,7 @@ iopath>=0.1.10
 torch==2.2.2
 torchvision==0.17.2
 diffusers
+gymnasium
 opencv-python>=4.5.0
 phosphobot
 openai>=1.0.0
